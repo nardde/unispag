@@ -167,7 +167,7 @@ function AddSubjectModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md animate-scale-in overflow-y-auto rounded-t-3xl bg-white p-6 shadow-apple-lg sm:rounded-3xl"
+        className="w-full max-w-md animate-scale-in overflow-y-auto rounded-t-3xl bg-card p-6 shadow-apple-lg sm:rounded-3xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-5 flex items-center justify-between">

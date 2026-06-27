@@ -29,12 +29,44 @@ export interface Subject {
   created_at: string;
 }
 
+export type UserRole = 'user' | 'admin';
+
 export interface Profile {
   id: string;
   username: string;
   avatar_url: string | null;
+  role: UserRole;
   created_at: string;
 }
+
+export type ReportStatus = 'pending' | 'resolved' | 'dismissed';
+
+export interface Report {
+  id: string;
+  file_id: string | null;
+  reported_by: string | null;
+  reason: string;
+  details: string | null;
+  status: ReportStatus;
+  created_at: string;
+}
+
+export interface Notification {
+  id: string;
+  user_id: string;
+  type: string;
+  message: string;
+  link: string | null;
+  read: boolean;
+  created_at: string;
+}
+
+export const REPORT_REASONS = [
+  'Contenido inapropiado',
+  'Archivo incorrecto',
+  'No corresponde a la materia',
+  'Otro',
+] as const;
 
 export interface FileRecord {
   id: string;
@@ -55,6 +87,9 @@ export interface FileRecord {
   // Joined relations (optional, populated by some queries)
   profiles?: Pick<Profile, 'username'> | null;
   subjects?: Pick<Subject, 'name' | 'slug'> | null;
+  // Aggregates computed client-side (ratings)
+  score?: number;
+  my_vote?: 0 | 1 | -1;
 }
 
 export interface UniversityWithCount extends University {

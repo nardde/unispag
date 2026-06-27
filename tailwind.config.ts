@@ -1,6 +1,7 @@
 import type { Config } from 'tailwindcss';
 
 const config: Config = {
+  darkMode: 'class',
   content: [
     './app/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -8,7 +9,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Apple blue accent scale (#0071E3 = 500)
+        // Apple blue accent scale (#0071E3 = 500) — same in both themes
         brand: {
           50: '#e9f3fe',
           100: '#cfe4fc',
@@ -21,11 +22,13 @@ const config: Config = {
           800: '#0c4685',
           900: '#0d3a6b',
         },
-        // Apple neutrals
-        ink: '#1d1d1f', // headings
-        subtle: '#6e6e73', // secondary text
-        surface: '#f5f5f7', // section backgrounds
-        hairline: '#d2d2d7', // faint dividers
+        // Theme-aware semantic colors (driven by CSS vars; see globals.css).
+        canvas: 'rgb(var(--canvas) / <alpha-value>)', // page background
+        card: 'rgb(var(--card) / <alpha-value>)', // card / panel background
+        ink: 'rgb(var(--ink) / <alpha-value>)', // headings / primary text
+        subtle: 'rgb(var(--subtle) / <alpha-value>)', // secondary text
+        surface: 'rgb(var(--surface) / <alpha-value>)', // section backgrounds
+        hairline: 'rgb(var(--hairline) / <alpha-value>)', // faint dividers
       },
       fontFamily: {
         sans: [

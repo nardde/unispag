@@ -2,6 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --canvas: 255 255 255; /* white */
+  --card: 255 255 255;
+  --ink: 29 29 31; /* #1d1d1f */
+  --subtle: 110 110 115; /* #6e6e73 */
+  --surface: 245 245 247; /* #f5f5f7 */
+  --hairline: 210 210 215; /* #d2d2d7 */
+  --glass: 255 255 255;
+}
+
+.dark {
+  --canvas: 10 10 10; /* #0a0a0a */
+  --card: 26 26 26; /* #1a1a1a */
+  --ink: 245 245 247; /* #f5f5f7 */
+  --subtle: 161 161 166; /* #a1a1a6 */
+  --surface: 31 31 31; /* #1f1f1f */
+  --hairline: 42 42 42; /* #2a2a2a */
+  --glass: 10 10 10;
+}
+
 html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -9,8 +29,16 @@ html {
 }
 
 body {
-  @apply bg-white text-ink;
+  @apply bg-canvas text-ink;
   letter-spacing: -0.01em;
+}
+
+/* Smooth theme transition */
+* {
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
 }
 
 @layer base {
@@ -29,14 +57,14 @@ body {
 
   /* Frosted glass surface (navbar, sticky bars) */
   .glass {
-    background: rgba(255, 255, 255, 0.72);
+    background: rgb(var(--glass) / 0.72);
     backdrop-filter: saturate(180%) blur(20px);
     -webkit-backdrop-filter: saturate(180%) blur(20px);
   }
 
   /* Buttons — Apple pill shapes */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-pill px-5 py-2.5 text-sm font-medium transition-all duration-200 ease-apple focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-pill px-5 py-2.5 text-sm font-medium transition-all duration-200 ease-apple focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 focus-visible:ring-offset-canvas disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .btn-primary {
@@ -53,7 +81,7 @@ body {
 
   /* Inputs */
   .input {
-    @apply block w-full rounded-xl border border-hairline bg-white px-3.5 py-2.5 text-[15px] text-ink shadow-sm transition placeholder:text-subtle/60 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30;
+    @apply block w-full rounded-xl border border-hairline bg-card px-3.5 py-2.5 text-[15px] text-ink shadow-sm transition placeholder:text-subtle/60 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30;
   }
 
   .label {
@@ -62,7 +90,7 @@ body {
 
   /* Cards — soft, borderless, rounded */
   .card {
-    @apply rounded-2xl bg-white shadow-apple ring-1 ring-black/[0.04];
+    @apply rounded-2xl bg-card shadow-apple ring-1 ring-black/[0.04] dark:ring-white/[0.06];
   }
 
   .card-hover {
@@ -80,7 +108,7 @@ body {
   position: relative;
 }
 .float-field input {
-  @apply block w-full rounded-xl border border-hairline bg-white px-3.5 pb-2 pt-5 text-[15px] text-ink transition focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30;
+  @apply block w-full rounded-xl border border-hairline bg-card px-3.5 pb-2 pt-5 text-[15px] text-ink transition focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30;
 }
 .float-field label {
   @apply pointer-events-none absolute left-3.5 top-3.5 text-[15px] text-subtle transition-all duration-150;

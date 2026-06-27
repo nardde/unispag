@@ -91,6 +91,42 @@ You can copy-paste each file's contents into the SQL editor and click **Run**.
 >    adds `acronym`/`zone` on universities, `description` + an authenticated
 >    INSERT policy on `subjects`, and seeds the 10 CABA/AMBA universities and
 >    their careers.
+> 3. [`supabase/migration-features.sql`](./supabase/migration-features.sql) —
+>    see **Nuevas migraciones** below.
+
+## Nuevas migraciones
+
+[`supabase/migration-features.sql`](./supabase/migration-features.sql) adds the
+admin system, reports, ratings, full-text search, follows and notifications.
+Run it once in the **SQL Editor** (idempotent). It creates / alters:
+
+- `profiles.role` (`user` | `admin`) + an `is_admin()` helper and admin RLS
+  policies (admins can manage any file / subject / university / report / user)
+- `reports` table (+ RLS: users insert/read their own, admins manage all)
+- `file_ratings` table (thumbs up/down, one per user per file)
+- `files.fts` generated `tsvector` column + GIN index (Spanish full-text search)
+- `subject_follows` and `notifications` tables (+ RLS)
+- `notify_subject_followers()` trigger — inserts a notification for every
+  follower when a new file is uploaded to a subject
+
+### Make yourself an admin
+
+After running the migration, find your user UUID in
+**Authentication → Users**, then run in the SQL Editor:
+
+```sql
+UPDATE profiles SET role = 'admin' WHERE id = 'YOUR_USER_UUID';
+```
+
+The admin panel lives at **/admin** and is protected: non-admins are redirected
+to the homepage (enforced in `app/admin/layout.tsx`).
+
+### Email verification (Item 12)
+
+Enable **Authentication → Providers → Email → "Confirm email"** in Supabase.
+Unverified users can browse and download, but the upload and rating actions are
+gated — they see a "Verificá tu email para subir" call to action that links to
+`/verify-email` (which can resend the confirmation email).
 
 ### 5. (Optional) Email confirmation
 

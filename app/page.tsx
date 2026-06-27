@@ -1,10 +1,68 @@
 import { createServerClient } from '@/lib/supabase-server';
 import { UniversityGrid } from '@/components/UniversityGrid';
+import { TrendingFiles, type TrendingItem } from '@/components/TrendingFiles';
 import { SetupNotice } from '@/components/SetupNotice';
 import { EmptyState } from '@/components/EmptyState';
-import type { University, UniversityWithCount } from '@/types';
+import type { University, UniversityWithCount, FileCategory } from '@/types';
 
 export const dynamic = 'force-dynamic';
+
+interface TrendingRow {
+  id: string;
+  title: string;
+  category: FileCategory;
+  downloads: number;
+  subjects: { name: string; slug: string } | null;
+  careers: {
+    name: string;
+    slug: string;
+    universities: { name: string; slug: string } | null;
+  } | null;
+}
+
+async function getTrending(): Promise<TrendingItem[]> {
+  try {
+    const supabase = createServerClient();
+    const { data } = await supabase
+      .from('files')
+      .select(
+        'id, title, category, downloads, subjects(name, slug), careers(name, slug, universities(name, slug))'
+      )
+      .not('subject_id', 'is', null)
+      .order('downloads', { ascending: false })
+      .limit(6);
+
+    const rows = (data ?? []) as unknown as TrendingRow[];
+    if (rows.length === 0) return [];
+
+    // One query for rating scores of these files.
+    const ids = rows.map((r) => r.id);
+    const { data: ratings } = await supabase
+      .from('file_ratings')
+      .select('file_id, value')
+      .in('file_id', ids);
+    const scores = new Map<string, number>();
+    (ratings ?? []).forEach((r: { file_id: string; value: number }) => {
+      scores.set(r.file_id, (scores.get(r.file_id) ?? 0) + r.value);
+    });
+
+    return rows
+      .filter((r) => r.subjects && r.careers && r.careers.universities)
+      .map((r) => ({
+        id: r.id,
+        title: r.title,
+        category: r.category,
+        downloads: r.downloads ?? 0,
+        score: scores.get(r.id) ?? 0,
+        subjectName: r.subjects!.name,
+        careerName: r.careers!.name,
+        universityName: r.careers!.universities!.name,
+        href: `/${r.careers!.universities!.slug}/${r.careers!.slug}/${r.subjects!.slug}`,
+      }));
+  } catch {
+    return [];
+  }
+}
 
 async function getUniversities(): Promise<UniversityWithCount[] | null> {
   try {
@@ -36,6 +94,7 @@ async function getUniversities(): Promise<UniversityWithCount[] | null> {
 
 export default async function HomePage() {
   const universities = await getUniversities();
+  const trending = universities === null ? [] : await getTrending();
 
   return (
     <div className="container-page">
@@ -62,7 +121,10 @@ export default async function HomePage() {
           description="Ejecutá el script de datos iniciales (seed) descrito en el README para cargar las universidades y carreras."
         />
       ) : (
-        <UniversityGrid universities={universities} />
+        <>
+          <UniversityGrid universities={universities} />
+          <TrendingFiles items={trending} />
+        </>
       )}
     </div>
   );

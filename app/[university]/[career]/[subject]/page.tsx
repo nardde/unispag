@@ -3,6 +3,7 @@ import { createServerClient } from '@/lib/supabase-server';
 import { Breadcrumb } from '@/components/Breadcrumb';
 import { FileUpload } from '@/components/FileUpload';
 import { FileBrowser } from '@/components/FileBrowser';
+import { FollowSubject } from '@/components/FollowSubject';
 import { EmptyState } from '@/components/EmptyState';
 import { SetupNotice } from '@/components/SetupNotice';
 import { yearLabel, semesterLabel } from '@/types';
@@ -119,13 +120,16 @@ export default async function SubjectPage({
             </p>
           )}
         </div>
-        <FileUpload
-          careerId={career.id}
-          universitySlug={university.slug}
-          careerSlug={career.slug}
-          subjects={[subject]}
-          presetSubject={subject}
-        />
+        <div className="flex shrink-0 items-center gap-2">
+          <FollowSubject subjectId={subject.id} />
+          <FileUpload
+            careerId={career.id}
+            universitySlug={university.slug}
+            careerSlug={career.slug}
+            subjects={[subject]}
+            presetSubject={subject}
+          />
+        </div>
       </header>
 
       {files.length === 0 ? (

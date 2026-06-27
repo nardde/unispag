@@ -80,6 +80,15 @@ function LoginForm() {
           onChange={setPassword}
         />
 
+        <div className="text-right">
+          <Link
+            href="/forgot-password"
+            className="text-sm font-medium text-brand-500 hover:underline"
+          >
+            ¿Olvidaste tu contraseña?
+          </Link>
+        </div>
+
         {error && (
           <p className="rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700">
             {error}

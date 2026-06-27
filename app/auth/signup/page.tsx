@@ -15,7 +15,6 @@ export default function SignupPage() {
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [done, setDone] = useState(false);
 
   function validate(): string | null {
     const u = slugify(username);
@@ -67,31 +66,7 @@ export default function SignupPage() {
       return;
     }
 
-    setDone(true);
-    setLoading(false);
-  }
-
-  if (done) {
-    return (
-      <AuthShell
-        title="Revisá tu email"
-        subtitle="Te enviamos un enlace de confirmación."
-        footer={
-          <Link
-            href="/auth/login"
-            className="font-medium text-brand-500 hover:underline"
-          >
-            Volver a iniciar sesión
-          </Link>
-        }
-      >
-        <p className="text-center text-sm text-subtle">
-          Confirmá tu dirección de correo desde el enlace que enviamos a{' '}
-          <span className="font-medium text-ink">{email}</span> para activar tu
-          cuenta.
-        </p>
-      </AuthShell>
-    );
+    router.push(`/verify-email?email=${encodeURIComponent(email.trim())}`);
   }
 
   return (

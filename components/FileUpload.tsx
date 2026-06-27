@@ -66,6 +66,18 @@ export function FileUpload({
     );
   }
 
+  if (!user.email_confirmed_at) {
+    return (
+      <Link
+        href="/verify-email"
+        className="btn-secondary"
+        title="Verificá tu email para subir archivos"
+      >
+        Verificá tu email para subir
+      </Link>
+    );
+  }
+
   return (
     <>
       <button
@@ -237,7 +249,7 @@ function UploadModal({
       onClick={onClose}
     >
       <div
-        className="max-h-[92vh] w-full max-w-lg animate-scale-in overflow-y-auto rounded-t-3xl bg-white p-6 shadow-apple-lg sm:rounded-3xl"
+        className="max-h-[92vh] w-full max-w-lg animate-scale-in overflow-y-auto rounded-t-3xl bg-card p-6 shadow-apple-lg sm:rounded-3xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-5 flex items-center justify-between">

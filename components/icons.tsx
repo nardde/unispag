@@ -68,6 +68,67 @@ export function FileTypeIcon({ ext, className }: { ext: string; className?: stri
   );
 }
 
+export function FlagIcon({ className }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" aria-hidden>
+      <path d="M5 3v14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      <path d="M5 4h9l-1.5 3L14 10H5V4Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+export function ThumbUpIcon({ className }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" aria-hidden>
+      <path d="M6 9l3-5.5c1 0 1.8.8 1.8 1.8V8h3.4c1 0 1.7.9 1.5 1.9l-1 4.6c-.2.9-1 1.5-1.9 1.5H6V9Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+      <path d="M6 9H4.5A.5.5 0 0 0 4 9.5v5a.5.5 0 0 0 .5.5H6" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  );
+}
+
+export function ThumbDownIcon({ className }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" aria-hidden>
+      <path d="M14 11l-3 5.5c-1 0-1.8-.8-1.8-1.8V12H5.8c-1 0-1.7-.9-1.5-1.9l1-4.6C5.5 4.6 6.3 4 7.2 4H14v7Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+      <path d="M14 11h1.5a.5.5 0 0 0 .5-.5v-5a.5.5 0 0 0-.5-.5H14" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  );
+}
+
+export function BellIcon({ className }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" aria-hidden>
+      <path d="M6 8a4 4 0 0 1 8 0c0 3.5 1 4.5 1.5 5.5h-11C5 12.5 6 11.5 6 8Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+      <path d="M8.5 16a1.5 1.5 0 0 0 3 0" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function SunIcon({ className }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" aria-hidden>
+      <circle cx="10" cy="10" r="3.5" stroke="currentColor" strokeWidth="1.6" />
+      <path d="M10 2.5v1.5M10 16v1.5M17.5 10H16M4 10H2.5M15 5l-1 1M6 14l-1 1M15 15l-1-1M6 6 5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function MoonIcon({ className }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" aria-hidden>
+      <path d="M16 11.5A6.5 6.5 0 0 1 8.5 4a6.5 6.5 0 1 0 7.5 7.5Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+export function CloseIcon({ className }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" aria-hidden>
+      <path d="m5 5 10 10M15 5 5 15" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 /** Per-career symbol (keyed by career slug). */
 export const CAREER_EMOJI: Record<string, string> = {
   derecho: '⚖️',
