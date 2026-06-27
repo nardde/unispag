@@ -19,9 +19,12 @@ export function AuthShell({
           className="mx-auto mb-6 flex w-fit items-center gap-2"
           aria-label="UniFiles"
         >
-          <span className="flex h-8 w-8 items-center justify-center rounded-[9px] bg-brand-500 text-sm font-bold text-white">
-            U
-          </span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo.png"
+            alt="UniFiles"
+            className="h-9 w-9 rounded-[9px] object-cover"
+          />
           <span className="text-lg font-semibold tracking-tight text-ink">
             UniFiles
           </span>

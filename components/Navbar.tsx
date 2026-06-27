@@ -47,9 +47,12 @@ export function Navbar() {
     <header className="glass sticky top-0 z-30 border-b border-black/[0.06] dark:border-white/[0.08]">
       <nav className="container-page flex h-14 items-center gap-3">
         <Link href="/" className="flex shrink-0 items-center gap-2">
-          <span className="flex h-7 w-7 items-center justify-center rounded-[8px] bg-brand-500 text-[13px] font-bold text-white">
-            U
-          </span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo.png"
+            alt="UniFiles"
+            className="h-8 w-8 rounded-[8px] object-cover"
+          />
           <span className="hidden text-[17px] font-semibold tracking-tight text-ink sm:block">
             UniFiles
           </span>
