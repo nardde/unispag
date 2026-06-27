@@ -93,6 +93,8 @@ You can copy-paste each file's contents into the SQL editor and click **Run**.
 >    their careers.
 > 3. [`supabase/migration-features.sql`](./supabase/migration-features.sql) —
 >    see **Nuevas migraciones** below.
+> 4. [`supabase/migration-onboarding.sql`](./supabase/migration-onboarding.sql) —
+>    see **Nuevas migraciones** below.
 
 ## Nuevas migraciones
 
@@ -127,6 +129,34 @@ Enable **Authentication → Providers → Email → "Confirm email"** in Supabas
 Unverified users can browse and download, but the upload and rating actions are
 gated — they see a "Verificá tu email para subir" call to action that links to
 `/verify-email` (which can resend the confirmation email).
+
+### Onboarding, profile personalization & feedback
+
+[`supabase/migration-onboarding.sql`](./supabase/migration-onboarding.sql)
+(idempotent) adds:
+
+- `profiles` columns: `onboarding_completed`, `bio`, `year_of_study` (1–6),
+  `feedback_given`, `visit_count`, `first_visit_at` (`avatar_url` already exists)
+- `user_universities` and `user_careers` (each user's selected unis/careers, RLS:
+  public read, owner manages)
+- `feedback` table (rating, liked[], improvements[], `improvements_other`, NPS,
+  contact email) — users insert their own, admins read all
+- `avatars` storage bucket (public read; users write only under their own
+  `{user_id}/…` folder)
+
+What it powers:
+
+- **First-login onboarding** (3-step overlay) to pick universities & careers,
+  re-openable from the homepage "Personalizar" button. The homepage then shows
+  your universities first (with a "Tu universidad" badge) and a "Tus materias"
+  section.
+- **Profile personalization**: avatar upload (camera overlay, JPG/PNG/WEBP ≤5MB,
+  initials fallback with a consistent color), `/perfil/editar` (username with
+  live uniqueness check, bio with counter, year, uni/career multi-selects), and
+  the public profile shows avatar, bio and badges.
+- **Feedback**: a one-time modal triggered by the 3rd download, the 1st upload,
+  or 7 days + 3 visits; results live in the admin **Opiniones** section
+  (averages, NPS, distribution, tag clouds, table, CSV export).
 
 ### 5. (Optional) Email confirmation
 

@@ -35,9 +35,52 @@ export interface Profile {
   id: string;
   username: string;
   avatar_url: string | null;
+  bio: string | null;
+  year_of_study: number | null;
   role: UserRole;
+  onboarding_completed: boolean;
+  feedback_given: boolean;
+  visit_count: number;
+  first_visit_at: string | null;
   created_at: string;
 }
+
+export interface Feedback {
+  id: string;
+  user_id: string | null;
+  rating: number | null;
+  liked: string[] | null;
+  improvements: string[] | null;
+  improvements_other: string | null;
+  nps_score: number | null;
+  contact_email: string | null;
+  created_at: string;
+}
+
+export const FEEDBACK_LIKES = [
+  'Fácil de usar',
+  'Buena organización',
+  'Muchos archivos',
+  'Diseño limpio',
+  'Útil para estudiar',
+] as const;
+
+export const FEEDBACK_IMPROVEMENTS = [
+  'Faltan archivos',
+  'Faltan materias',
+  'Faltan universidades',
+  'La app es lenta',
+  'Es difícil encontrar lo que busco',
+  'Otro',
+] as const;
+
+export const RATING_LABELS: Record<number, string> = {
+  1: 'Necesita mucha mejora',
+  2: 'Podría ser mejor',
+  3: 'Está bien',
+  4: 'Me gusta bastante',
+  5: '¡Me encanta!',
+};
 
 export type ReportStatus = 'pending' | 'resolved' | 'dismissed';
 

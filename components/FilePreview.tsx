@@ -4,6 +4,8 @@ import type { FileRecord } from '@/types';
 import { CATEGORY_LABELS } from '@/types';
 import { formatFileSize, formatDate } from '@/lib/utils';
 import { createClient } from '@/lib/supabase';
+import { useAuthUser } from '@/lib/useAuthUser';
+import { recordDownload } from '@/lib/engagement';
 import { CloseIcon, DownloadIcon, FileTypeIcon } from '@/components/icons';
 
 function extOf(name: string): string {
@@ -18,12 +20,14 @@ export function FilePreview({
   file: FileRecord;
   onClose: () => void;
 }) {
+  const { user } = useAuthUser();
   const ext = extOf(file.file_name);
   const isPdf = ext === 'pdf';
   const isImage = ['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(ext);
   const subjectName = file.subjects?.name ?? file.subject;
 
   function bumpDownload() {
+    recordDownload(user?.id);
     createClient()
       .rpc('increment_downloads', { p_file_id: file.id })
       .then(

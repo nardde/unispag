@@ -1,12 +1,15 @@
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createServerClient } from '@/lib/supabase-server';
 import { Breadcrumb } from '@/components/Breadcrumb';
 import { ProfileFiles } from '@/components/ProfileFiles';
 import { FileCard } from '@/components/FileCard';
-import { EditProfile } from '@/components/EditProfile';
+import { Avatar } from '@/components/Avatar';
+import { AvatarUploader } from '@/components/AvatarUploader';
 import { SetupNotice } from '@/components/SetupNotice';
 import { EmptyState } from '@/components/EmptyState';
 import { formatDate } from '@/lib/utils';
+import { yearLabel } from '@/types';
 import type { FileRecord, Profile } from '@/types';
 
 export const dynamic = 'force-dynamic';
@@ -41,16 +44,22 @@ export default async function ProfilePage({
   } = await supabase.auth.getUser();
   const isOwn = user?.id === p.id;
 
-  const { data: files } = await supabase
-    .from('files')
-    .select('*, profiles(username), subjects(name, slug)')
-    .eq('user_id', p.id)
-    .order('created_at', { ascending: false });
+  const [{ data: files }, { data: uu }, { data: uc }] = await Promise.all([
+    supabase
+      .from('files')
+      .select('*, profiles(username), subjects(name, slug)')
+      .eq('user_id', p.id)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('user_universities')
+      .select('universities(name, acronym)')
+      .eq('user_id', p.id),
+    supabase.from('user_careers').select('careers(name)').eq('user_id', p.id),
+  ]);
 
   const fileList = (files ?? []) as FileRecord[];
   const totalDownloads = fileList.reduce((n, f) => n + (f.downloads ?? 0), 0);
 
-  // Total upvotes received across their files.
   let upvotes = 0;
   if (fileList.length) {
     const { count } = await supabase
@@ -64,17 +73,31 @@ export default async function ProfilePage({
     upvotes = count ?? 0;
   }
 
+  const uniNames = (uu ?? [])
+    .map((r: any) => r.universities?.acronym ?? r.universities?.name)
+    .filter(Boolean) as string[];
+  const careerNames = (uc ?? [])
+    .map((r: any) => r.careers?.name)
+    .filter(Boolean) as string[];
+
   return (
     <div className="container-page">
       <Breadcrumb
         items={[{ label: 'Inicio', href: '/' }, { label: `@${p.username}` }]}
       />
 
-      <header className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+      <header className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-center gap-4">
-          <span className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-brand-500 to-[#46a3ff] text-2xl font-bold text-white">
-            {p.username[0]?.toUpperCase()}
-          </span>
+          {isOwn ? (
+            <AvatarUploader
+              userId={p.id}
+              username={p.username}
+              avatarUrl={p.avatar_url}
+              size={72}
+            />
+          ) : (
+            <Avatar username={p.username} avatarUrl={p.avatar_url} size={72} />
+          )}
           <div>
             <h1 className="text-3xl font-semibold tracking-tight text-ink">
               @{p.username}
@@ -82,11 +105,38 @@ export default async function ProfilePage({
             <p className="mt-1 text-sm text-subtle">
               Miembro desde {formatDate(p.created_at)}
             </p>
+            {p.bio && <p className="mt-2 max-w-md text-sm text-ink/90">{p.bio}</p>}
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {p.year_of_study && (
+                <span className="chip">{yearLabel(p.year_of_study)}</span>
+              )}
+              {uniNames.map((n, i) => (
+                <span
+                  key={`u-${i}`}
+                  className="chip bg-brand-50 text-brand-700 dark:bg-brand-900/40 dark:text-brand-200"
+                >
+                  {n}
+                </span>
+              ))}
+              {careerNames.map((n, i) => (
+                <span key={`c-${i}`} className="chip">
+                  {n}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
-        {isOwn && (
-          <EditProfile userId={p.id} currentUsername={p.username} />
-        )}
+        <div className="flex shrink-0 gap-2">
+          {isOwn ? (
+            <Link href="/perfil/editar" className="btn-secondary">
+              Editar perfil
+            </Link>
+          ) : (
+            <button className="btn-primary" title="Próximamente">
+              Seguir
+            </button>
+          )}
+        </div>
       </header>
 
       <div className="mb-10 grid grid-cols-3 gap-3 sm:max-w-xl">

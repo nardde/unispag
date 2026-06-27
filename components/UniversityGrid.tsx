@@ -14,21 +14,33 @@ function normalize(s: string) {
 
 export function UniversityGrid({
   universities,
+  highlightIds = [],
 }: {
   universities: UniversityWithCount[];
+  highlightIds?: string[];
 }) {
   const [query, setQuery] = useState('');
+  const highlight = useMemo(() => new Set(highlightIds), [highlightIds]);
+
+  const ordered = useMemo(() => {
+    if (highlight.size === 0) return universities;
+    return [...universities].sort((a, b) => {
+      const aH = highlight.has(a.id) ? 0 : 1;
+      const bH = highlight.has(b.id) ? 0 : 1;
+      return aH - bH;
+    });
+  }, [universities, highlight]);
 
   const filtered = useMemo(() => {
     const q = normalize(query.trim());
-    if (!q) return universities;
-    return universities.filter(
+    if (!q) return ordered;
+    return ordered.filter(
       (u) =>
         normalize(u.name).includes(q) ||
         normalize(u.acronym ?? '').includes(q) ||
         normalize(u.zone ?? '').includes(q)
     );
-  }, [universities, query]);
+  }, [ordered, query]);
 
   return (
     <div>
@@ -55,7 +67,11 @@ export function UniversityGrid({
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((u) => (
-            <UniversityCard key={u.id} university={u} />
+            <UniversityCard
+              key={u.id}
+              university={u}
+              highlight={highlight.has(u.id)}
+            />
           ))}
         </div>
       )}

@@ -10,6 +10,7 @@ const LINKS = [
   { href: '/admin/usuarios', label: 'Usuarios' },
   { href: '/admin/universidades', label: 'Universidades' },
   { href: '/admin/materias', label: 'Materias' },
+  { href: '/admin/opiniones', label: 'Opiniones' },
 ];
 
 export function AdminSidebar({ pendingReports }: { pendingReports: number }) {

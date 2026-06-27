@@ -28,18 +28,31 @@ function fallbackAcronym(name: string) {
     .toUpperCase();
 }
 
-export function UniversityCard({ university }: { university: UniversityWithCount }) {
+export function UniversityCard({
+  university,
+  highlight = false,
+}: {
+  university: UniversityWithCount;
+  highlight?: boolean;
+}) {
   const gradient = GRADIENTS[university.slug] ?? FALLBACK_GRADIENT;
   const acronym = university.acronym ?? fallbackAcronym(university.name);
 
   return (
     <Link
       href={`/${university.slug}`}
-      className="card card-hover group flex flex-col overflow-hidden"
+      className={`card card-hover group flex flex-col overflow-hidden ${
+        highlight ? 'ring-2 ring-brand-500' : ''
+      }`}
     >
       <div
         className={`relative flex h-32 items-center justify-center bg-gradient-to-br ${gradient}`}
       >
+        {highlight && (
+          <span className="absolute left-3 top-3 rounded-full bg-white/25 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+            Tu universidad
+          </span>
+        )}
         {university.logo_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img

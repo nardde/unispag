@@ -6,6 +6,7 @@ import { CATEGORY_LABELS, yearLabel } from '@/types';
 import { formatFileSize, formatDate } from '@/lib/utils';
 import { createClient } from '@/lib/supabase';
 import { useAuthUser } from '@/lib/useAuthUser';
+import { recordDownload } from '@/lib/engagement';
 import { useToast } from '@/components/Toast';
 import { ReportModal } from '@/components/ReportModal';
 import { FilePreview } from '@/components/FilePreview';
@@ -114,6 +115,7 @@ export function FileCard({
   function handleDownload(e: React.MouseEvent) {
     e.stopPropagation();
     setDownloads((n) => n + 1);
+    recordDownload(user?.id);
     createClient()
       .rpc('increment_downloads', { p_file_id: file.id })
       .then(

@@ -13,6 +13,7 @@ import {
   semesterLabel,
 } from '@/types';
 import { formatFileSize, sanitizeFileName } from '@/lib/utils';
+import { recordUpload } from '@/lib/engagement';
 
 const MAX_BYTES = 25 * 1024 * 1024; // 25 MB
 
@@ -230,6 +231,7 @@ function UploadModal({
         throw insertError;
       }
 
+      recordUpload(userId);
       onSuccess();
     } catch (err) {
       setError(

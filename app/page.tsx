@@ -1,8 +1,13 @@
+import Link from 'next/link';
 import { createServerClient } from '@/lib/supabase-server';
+import { getCurrentProfile } from '@/lib/auth';
 import { UniversityGrid } from '@/components/UniversityGrid';
 import { TrendingFiles, type TrendingItem } from '@/components/TrendingFiles';
+import { Onboarding } from '@/components/onboarding/Onboarding';
 import { SetupNotice } from '@/components/SetupNotice';
 import { EmptyState } from '@/components/EmptyState';
+import { formatDate } from '@/lib/utils';
+import { yearLabel, semesterLabel } from '@/types';
 import type { University, UniversityWithCount, FileCategory } from '@/types';
 
 export const dynamic = 'force-dynamic';
@@ -20,6 +25,32 @@ interface TrendingRow {
   } | null;
 }
 
+async function getUniversities(): Promise<UniversityWithCount[] | null> {
+  try {
+    const supabase = createServerClient();
+    const { data: universities, error } = await supabase
+      .from('universities')
+      .select('*')
+      .order('name');
+    if (error) throw error;
+
+    const { data: careers } = await supabase
+      .from('careers')
+      .select('university_id');
+    const counts = new Map<string, number>();
+    (careers ?? []).forEach((c: { university_id: string }) => {
+      counts.set(c.university_id, (counts.get(c.university_id) ?? 0) + 1);
+    });
+
+    return (universities as University[]).map((u) => ({
+      ...u,
+      careerCount: counts.get(u.id) ?? 0,
+    }));
+  } catch {
+    return null;
+  }
+}
+
 async function getTrending(): Promise<TrendingItem[]> {
   try {
     const supabase = createServerClient();
@@ -35,7 +66,6 @@ async function getTrending(): Promise<TrendingItem[]> {
     const rows = (data ?? []) as unknown as TrendingRow[];
     if (rows.length === 0) return [];
 
-    // One query for rating scores of these files.
     const ids = rows.map((r) => r.id);
     const { data: ratings } = await supabase
       .from('file_ratings')
@@ -64,41 +94,85 @@ async function getTrending(): Promise<TrendingItem[]> {
   }
 }
 
-async function getUniversities(): Promise<UniversityWithCount[] | null> {
-  try {
-    const supabase = createServerClient();
-    const { data: universities, error } = await supabase
-      .from('universities')
-      .select('*')
-      .order('name');
+interface MateriaRow {
+  id: string;
+  name: string;
+  slug: string;
+  year: number;
+  semester: number;
+  careers: { slug: string; name: string; universities: { slug: string } | null } | null;
+}
 
-    if (error) throw error;
+async function getPersonalization(userId: string) {
+  const supabase = createServerClient();
+  const [{ data: uu }, { data: uc }] = await Promise.all([
+    supabase.from('user_universities').select('university_id').eq('user_id', userId),
+    supabase.from('user_careers').select('career_id').eq('user_id', userId),
+  ]);
+  const myUniIds = (uu ?? []).map((r: { university_id: string }) => r.university_id);
+  const myCareerIds = (uc ?? []).map((r: { career_id: string }) => r.career_id);
 
-    const { data: careers } = await supabase
-      .from('careers')
-      .select('university_id');
+  let materias: {
+    id: string;
+    name: string;
+    href: string;
+    year: number;
+    semester: number;
+    fileCount: number;
+    latest: string | null;
+  }[] = [];
 
+  if (myCareerIds.length) {
+    const { data: subs } = await supabase
+      .from('subjects')
+      .select('id, name, slug, year, semester, careers(slug, name, universities(slug))')
+      .in('career_id', myCareerIds)
+      .limit(40);
+    const rows = (subs ?? []) as unknown as MateriaRow[];
+    const subIds = rows.map((r) => r.id);
     const counts = new Map<string, number>();
-    (careers ?? []).forEach((c: { university_id: string }) => {
-      counts.set(c.university_id, (counts.get(c.university_id) ?? 0) + 1);
-    });
-
-    return (universities as University[]).map((u) => ({
-      ...u,
-      careerCount: counts.get(u.id) ?? 0,
-    }));
-  } catch {
-    return null;
+    const latest = new Map<string, string>();
+    if (subIds.length) {
+      const { data: files } = await supabase
+        .from('files')
+        .select('subject_id, created_at')
+        .in('subject_id', subIds);
+      (files ?? []).forEach((f: { subject_id: string; created_at: string }) => {
+        counts.set(f.subject_id, (counts.get(f.subject_id) ?? 0) + 1);
+        const prev = latest.get(f.subject_id);
+        if (!prev || f.created_at > prev) latest.set(f.subject_id, f.created_at);
+      });
+    }
+    materias = rows
+      .filter((r) => r.careers?.universities)
+      .map((r) => ({
+        id: r.id,
+        name: r.name,
+        year: r.year,
+        semester: r.semester,
+        fileCount: counts.get(r.id) ?? 0,
+        latest: latest.get(r.id) ?? null,
+        href: `/${r.careers!.universities!.slug}/${r.careers!.slug}/${r.slug}`,
+      }))
+      .sort((a, b) => b.fileCount - a.fileCount)
+      .slice(0, 12);
   }
+
+  return { myUniIds, myCareerIds, materias };
 }
 
 export default async function HomePage() {
   const universities = await getUniversities();
+  const { userId, emailVerified, profile } = await getCurrentProfile();
+
+  const personalization =
+    universities && userId ? await getPersonalization(userId) : null;
   const trending = universities === null ? [] : await getTrending();
+  const autoOnboarding =
+    Boolean(userId) && emailVerified && profile?.onboarding_completed === false;
 
   return (
     <div className="container-page">
-      {/* Hero */}
       <section className="mx-auto mb-14 max-w-3xl pt-8 text-center sm:pt-12">
         <h1 className="text-balance text-4xl font-semibold tracking-tight text-ink sm:text-6xl">
           Todo el material de tu carrera,
@@ -111,6 +185,16 @@ export default async function HomePage() {
           Apuntes, parciales y resúmenes organizados por universidad, carrera y
           materia. Gratis, hecho por estudiantes.
         </p>
+        {userId && (
+          <div className="mt-6 flex justify-center">
+            <Onboarding
+              userId={userId}
+              autoOpen={autoOnboarding}
+              initialUniversities={personalization?.myUniIds ?? []}
+              initialCareers={personalization?.myCareerIds ?? []}
+            />
+          </div>
+        )}
       </section>
 
       {universities === null ? (
@@ -122,7 +206,40 @@ export default async function HomePage() {
         />
       ) : (
         <>
-          <UniversityGrid universities={universities} />
+          {personalization && personalization.materias.length > 0 && (
+            <section className="mb-12">
+              <h2 className="mb-5 text-sm font-semibold uppercase tracking-wide text-subtle">
+                Tus materias
+              </h2>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {personalization.materias.map((m) => (
+                  <Link
+                    key={m.id}
+                    href={m.href}
+                    className="card card-hover flex items-center justify-between gap-3 p-4"
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate text-[15px] font-medium text-ink">
+                        {m.name}
+                      </p>
+                      <p className="mt-0.5 text-xs text-subtle">
+                        {yearLabel(m.year)} · {semesterLabel(m.semester)}
+                        {m.latest ? ` · último ${formatDate(m.latest)}` : ''}
+                      </p>
+                    </div>
+                    <span className="shrink-0 rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700 dark:bg-brand-900/40 dark:text-brand-200">
+                      {m.fileCount}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+
+          <UniversityGrid
+            universities={universities}
+            highlightIds={personalization?.myUniIds ?? []}
+          />
           <TrendingFiles items={trending} />
         </>
       )}
