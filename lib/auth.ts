@@ -11,25 +11,35 @@ export async function getCurrentProfile(): Promise<{
   emailVerified: boolean;
   profile: Profile | null;
 }> {
-  const supabase = createServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { userId: null, email: null, emailVerified: false, profile: null };
-  }
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .maybeSingle();
-
-  return {
-    userId: user.id,
-    email: user.email ?? null,
-    emailVerified: Boolean(user.email_confirmed_at),
-    profile: (profile as Profile) ?? null,
+  const empty = {
+    userId: null,
+    email: null,
+    emailVerified: false,
+    profile: null,
   };
+
+  try {
+    const supabase = createServerClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) return empty;
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    return {
+      userId: user.id,
+      email: user.email ?? null,
+      emailVerified: Boolean(user.email_confirmed_at),
+      profile: (profile as Profile) ?? null,
+    };
+  } catch {
+    // Missing env / transient error — degrade gracefully instead of crashing.
+    return empty;
+  }
 }
