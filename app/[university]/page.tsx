@@ -3,12 +3,12 @@ import { createServerClient } from '@/lib/supabase-server';
 import { Breadcrumb } from '@/components/Breadcrumb';
 import { CareerCard } from '@/components/CareerCard';
 import { SetupNotice } from '@/components/SetupNotice';
-import type { University, Career } from '@/types';
+import type { University, Career, CareerWithCount } from '@/types';
 
 export const dynamic = 'force-dynamic';
 
 async function getData(slug: string): Promise<
-  | { ok: true; university: University; careers: Career[] }
+  | { ok: true; university: University; careers: CareerWithCount[] }
   | { ok: false; reason: 'config' | 'notfound' }
 > {
   let supabase;
@@ -33,10 +33,30 @@ async function getData(slug: string): Promise<
     .eq('university_id', university.id)
     .order('name');
 
+  const careerList = (careers ?? []) as Career[];
+
+  // File counts per career.
+  const counts = new Map<string, number>();
+  if (careerList.length) {
+    const { data: files } = await supabase
+      .from('files')
+      .select('career_id')
+      .in(
+        'career_id',
+        careerList.map((c) => c.id)
+      );
+    (files ?? []).forEach((f: { career_id: string }) => {
+      counts.set(f.career_id, (counts.get(f.career_id) ?? 0) + 1);
+    });
+  }
+
   return {
     ok: true,
     university: university as University,
-    careers: (careers ?? []) as Career[],
+    careers: careerList.map((c) => ({
+      ...c,
+      fileCount: counts.get(c.id) ?? 0,
+    })),
   };
 }
 
@@ -66,36 +86,34 @@ export default async function UniversityPage({
       />
 
       <header className="mb-8 flex items-center gap-4">
-        <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-brand-50 ring-1 ring-brand-100">
+        <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-brand-500 to-[#46a3ff] text-2xl font-bold text-white">
           {university.logo_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={university.logo_url}
               alt={university.name}
-              className="h-full w-full object-contain"
+              className="h-full w-full object-contain p-1.5"
             />
           ) : (
-            <span className="text-2xl font-bold text-brand-600">
-              {university.name.slice(0, 1)}
-            </span>
+            university.name.slice(0, 1)
           )}
         </div>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+          <h1 className="text-3xl font-semibold tracking-tight text-ink">
             {university.name}
           </h1>
           {university.description && (
-            <p className="mt-1 text-gray-600">{university.description}</p>
+            <p className="mt-1 text-subtle">{university.description}</p>
           )}
         </div>
       </header>
 
-      <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">
+      <h2 className="mb-5 text-sm font-semibold uppercase tracking-wide text-subtle">
         Carreras
       </h2>
 
       {careers.length === 0 ? (
-        <div className="card px-6 py-12 text-center text-sm text-gray-500">
+        <div className="card px-6 py-12 text-center text-sm text-subtle">
           Todavía no hay carreras cargadas para esta universidad.
         </div>
       ) : (

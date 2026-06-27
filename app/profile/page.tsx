@@ -35,7 +35,7 @@ export default async function ProfilePage() {
 
   const { data: files } = await supabase
     .from('files')
-    .select('*, profiles(username)')
+    .select('*, profiles(username), subjects(name, slug)')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
@@ -46,18 +46,18 @@ export default async function ProfilePage() {
       <Breadcrumb items={[{ label: 'Inicio', href: '/' }, { label: 'Mi perfil' }]} />
 
       <header className="mb-8 flex items-center gap-4">
-        <span className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-100 text-2xl font-bold text-brand-700">
+        <span className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-brand-500 to-[#46a3ff] text-2xl font-bold text-white">
           {username[0]?.toUpperCase()}
         </span>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+          <h1 className="text-3xl font-semibold tracking-tight text-ink">
             @{username}
           </h1>
-          <p className="mt-1 text-sm text-gray-500">{user.email}</p>
+          <p className="mt-1 text-sm text-subtle">{user.email}</p>
         </div>
       </header>
 
-      <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">
+      <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-subtle">
         Mis archivos
       </h2>
 

@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { createClient } from '@/lib/supabase';
 import { FileCard } from '@/components/FileCard';
+import { EmptyState } from '@/components/EmptyState';
 import type { FileRecord } from '@/types';
 
 /** Derive the storage object path from a public file URL. */
@@ -43,20 +43,11 @@ export function ProfileFiles({ initialFiles }: { initialFiles: FileRecord[] }) {
 
   if (files.length === 0) {
     return (
-      <div className="card flex flex-col items-center justify-center px-6 py-16 text-center">
-        <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-2xl">
-          📄
-        </div>
-        <h3 className="text-lg font-semibold text-gray-900">
-          Todavía no subiste archivos
-        </h3>
-        <p className="mt-1 max-w-sm text-sm text-gray-500">
-          Explorá las universidades y compartí tu primer apunte o resumen.
-        </p>
-        <Link href="/" className="btn-primary mt-4">
-          Explorar universidades
-        </Link>
-      </div>
+      <EmptyState
+        title="Todavía no subiste archivos"
+        description="Explorá las universidades y compartí tu primer apunte o resumen."
+        action={{ label: 'Explorar universidades', href: '/' }}
+      />
     );
   }
 

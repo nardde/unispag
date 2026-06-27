@@ -1,9 +1,6 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
 import './globals.css';
 import { Navbar } from '@/components/Navbar';
-
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata: Metadata = {
   title: 'UniFiles — Apuntes y exámenes universitarios',
@@ -17,12 +14,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es" className={inter.variable}>
+    <html lang="es">
       <body className="min-h-screen font-sans antialiased">
         <Navbar />
-        <main className="py-8">{children}</main>
-        <footer className="border-t border-gray-200 bg-white">
-          <div className="container-page flex flex-col items-center justify-between gap-2 py-6 text-sm text-gray-500 sm:flex-row">
+        <main className="py-10">{children}</main>
+        <footer className="mt-16 border-t border-hairline/60 bg-surface">
+          <div className="container-page flex flex-col items-center justify-between gap-2 py-8 text-sm text-subtle sm:flex-row">
             <p>© {new Date().getFullYear()} UniFiles</p>
             <p>Hecho por y para estudiantes.</p>
           </div>

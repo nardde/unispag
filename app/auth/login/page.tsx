@@ -4,7 +4,7 @@ import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase';
-import { AuthShell } from '@/components/AuthShell';
+import { AuthShell, FloatingInput } from '@/components/AuthShell';
 
 function LoginForm() {
   const router = useRouter();
@@ -49,56 +49,48 @@ function LoginForm() {
   return (
     <AuthShell
       title="Iniciar sesión"
-      subtitle="Accedé a tu cuenta para subir y gestionar archivos."
+      subtitle="Accedé para subir y gestionar archivos."
       footer={
         <p>
           ¿No tenés cuenta?{' '}
           <Link
             href="/auth/signup"
-            className="font-medium text-brand-600 hover:underline"
+            className="font-medium text-brand-500 hover:underline"
           >
             Registrate
           </Link>
         </p>
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="label" htmlFor="email">
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            autoComplete="email"
-            className="input"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="tu@email.com"
-          />
-        </div>
-        <div>
-          <label className="label" htmlFor="password">
-            Contraseña
-          </label>
-          <input
-            id="password"
-            type="password"
-            autoComplete="current-password"
-            className="input"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-          />
-        </div>
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <FloatingInput
+          id="email"
+          label="Email"
+          type="email"
+          autoComplete="email"
+          value={email}
+          onChange={setEmail}
+        />
+        <FloatingInput
+          id="password"
+          label="Contraseña"
+          type="password"
+          autoComplete="current-password"
+          value={password}
+          onChange={setPassword}
+        />
 
         {error && (
-          <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
+          <p className="rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700">
             {error}
           </p>
         )}
 
-        <button type="submit" className="btn-primary w-full" disabled={loading}>
+        <button
+          type="submit"
+          className="btn-primary w-full !rounded-xl"
+          disabled={loading}
+        >
           {loading ? 'Ingresando…' : 'Iniciar sesión'}
         </button>
       </form>

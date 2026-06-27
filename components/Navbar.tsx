@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase';
+import { ChevronIcon } from '@/components/icons';
 
 export function Navbar() {
   const router = useRouter();
@@ -38,32 +39,33 @@ export function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-30 border-b border-gray-200 bg-white/80 backdrop-blur">
-      <nav className="container-page flex h-16 items-center justify-between">
+    <header className="glass sticky top-0 z-30 border-b border-black/[0.06]">
+      <nav className="container-page flex h-14 items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600 text-sm font-bold text-white">
+          <span className="flex h-7 w-7 items-center justify-center rounded-[8px] bg-brand-500 text-[13px] font-bold text-white">
             U
           </span>
-          <span className="text-lg font-semibold tracking-tight text-gray-900">
+          <span className="text-[17px] font-semibold tracking-tight text-ink">
             UniFiles
           </span>
         </Link>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           {loading ? (
-            <div className="h-9 w-20 animate-pulse rounded-lg bg-gray-100" />
+            <div className="h-8 w-20 animate-pulse rounded-full bg-surface" />
           ) : user ? (
             <div className="relative">
               <button
                 onClick={() => setMenuOpen((o) => !o)}
-                className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-gray-100"
+                className="flex items-center gap-1.5 rounded-full py-1 pl-1 pr-2 transition-colors hover:bg-surface"
               >
                 <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-100 text-sm font-semibold text-brand-700">
                   {(user.email ?? '?')[0].toUpperCase()}
                 </span>
-                <span className="hidden max-w-[12rem] truncate text-sm text-gray-700 sm:block">
+                <span className="hidden max-w-[11rem] truncate text-sm text-ink/80 sm:block">
                   {user.email}
                 </span>
+                <ChevronIcon className="h-4 w-4 text-subtle" />
               </button>
               {menuOpen && (
                 <>
@@ -71,17 +73,17 @@ export function Navbar() {
                     className="fixed inset-0 z-10"
                     onClick={() => setMenuOpen(false)}
                   />
-                  <div className="absolute right-0 z-20 mt-2 w-48 overflow-hidden rounded-lg border border-gray-200 bg-white py-1 shadow-card-hover">
+                  <div className="absolute right-0 z-20 mt-2 w-52 origin-top-right animate-scale-in overflow-hidden rounded-2xl bg-white p-1.5 shadow-apple-lg ring-1 ring-black/[0.06]">
                     <Link
                       href="/profile"
                       onClick={() => setMenuOpen(false)}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      className="block rounded-xl px-3 py-2 text-sm text-ink hover:bg-surface"
                     >
                       Mi perfil
                     </Link>
                     <button
                       onClick={handleLogout}
-                      className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                      className="block w-full rounded-xl px-3 py-2 text-left text-sm text-ink hover:bg-surface"
                     >
                       Cerrar sesión
                     </button>

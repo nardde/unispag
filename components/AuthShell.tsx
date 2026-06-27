@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export function AuthShell({
   title,
   subtitle,
@@ -10,17 +12,63 @@ export function AuthShell({
   footer: React.ReactNode;
 }) {
   return (
-    <div className="container-page flex justify-center">
-      <div className="w-full max-w-md">
-        <div className="card p-8">
-          <h1 className="text-xl font-bold tracking-tight text-gray-900">
+    <div className="container-page flex min-h-[70vh] items-center justify-center">
+      <div className="w-full max-w-[400px]">
+        <Link
+          href="/"
+          className="mx-auto mb-6 flex w-fit items-center gap-2"
+          aria-label="UniFiles"
+        >
+          <span className="flex h-8 w-8 items-center justify-center rounded-[9px] bg-brand-500 text-sm font-bold text-white">
+            U
+          </span>
+          <span className="text-lg font-semibold tracking-tight text-ink">
+            UniFiles
+          </span>
+        </Link>
+        <div className="card animate-fade-in p-8">
+          <h1 className="text-center text-[22px] font-semibold tracking-tight text-ink">
             {title}
           </h1>
-          <p className="mt-1 text-sm text-gray-500">{subtitle}</p>
-          <div className="mt-6">{children}</div>
+          <p className="mt-1 text-center text-sm text-subtle">{subtitle}</p>
+          <div className="mt-7">{children}</div>
         </div>
-        <div className="mt-4 text-center text-sm text-gray-600">{footer}</div>
+        <div className="mt-5 text-center text-sm text-subtle">{footer}</div>
       </div>
+    </div>
+  );
+}
+
+/** Floating-label text input. */
+export function FloatingInput({
+  id,
+  label,
+  type = 'text',
+  value,
+  onChange,
+  autoComplete,
+  maxLength,
+}: {
+  id: string;
+  label: string;
+  type?: string;
+  value: string;
+  onChange: (v: string) => void;
+  autoComplete?: string;
+  maxLength?: number;
+}) {
+  return (
+    <div className="float-field">
+      <input
+        id={id}
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        autoComplete={autoComplete}
+        maxLength={maxLength}
+        placeholder=" "
+      />
+      <label htmlFor={id}>{label}</label>
     </div>
   );
 }

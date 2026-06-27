@@ -1,6 +1,7 @@
 import { createServerClient } from '@/lib/supabase-server';
 import { UniversityCard } from '@/components/UniversityCard';
 import { SetupNotice } from '@/components/SetupNotice';
+import { EmptyState } from '@/components/EmptyState';
 import type { University, UniversityWithCount } from '@/types';
 
 export const dynamic = 'force-dynamic';
@@ -38,49 +39,40 @@ export default async function HomePage() {
 
   return (
     <div className="container-page">
-      <section className="mb-10 max-w-2xl">
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-          Apuntes, exámenes y resúmenes
+      {/* Hero */}
+      <section className="mx-auto mb-14 max-w-3xl pt-8 text-center sm:pt-12">
+        <h1 className="text-balance text-4xl font-semibold tracking-tight text-ink sm:text-6xl">
+          Todo el material de tu carrera,
+          <br className="hidden sm:block" />{' '}
+          <span className="bg-gradient-to-r from-brand-500 to-[#46a3ff] bg-clip-text text-transparent">
+            en un solo lugar.
+          </span>
         </h1>
-        <p className="mt-3 text-lg text-gray-600">
-          Encontrá y compartí material de estudio organizado por universidad y
-          carrera. Gratis, hecho por estudiantes.
+        <p className="mx-auto mt-5 max-w-xl text-lg text-subtle sm:text-xl">
+          Apuntes, parciales y resúmenes organizados por universidad, carrera y
+          materia. Gratis, hecho por estudiantes.
         </p>
       </section>
 
       {universities === null ? (
         <SetupNotice />
       ) : universities.length === 0 ? (
-        <EmptyState />
+        <EmptyState
+          title="Todavía no hay universidades"
+          description="Ejecutá el script de datos iniciales (seed) descrito en el README para cargar las universidades y carreras."
+        />
       ) : (
         <>
-          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">
+          <h2 className="mb-5 text-sm font-semibold uppercase tracking-wide text-subtle">
             Universidades
           </h2>
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {universities.map((u) => (
               <UniversityCard key={u.id} university={u} />
             ))}
           </div>
         </>
       )}
-    </div>
-  );
-}
-
-function EmptyState() {
-  return (
-    <div className="card flex flex-col items-center justify-center px-6 py-16 text-center">
-      <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-2xl">
-        🎓
-      </div>
-      <h3 className="text-lg font-semibold text-gray-900">
-        Todavía no hay universidades
-      </h3>
-      <p className="mt-1 max-w-sm text-sm text-gray-500">
-        Ejecutá el script de datos iniciales (seed) descrito en el README para
-        cargar las universidades y carreras.
-      </p>
     </div>
   );
 }

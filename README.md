@@ -1,8 +1,8 @@
 # UniFiles
 
-A clean, professional platform for university students to share and download
+A clean, Apple-inspired platform for university students to share and download
 study material — notes, exams, summaries and more — organized by **university →
-career → files**.
+career → subject (year & semester) → files**.
 
 Built with **Next.js 14 (App Router)**, **TypeScript**, **Tailwind CSS**, and
 **Supabase** (Auth + Postgres + Storage).
@@ -11,14 +11,18 @@ Built with **Next.js 14 (App Router)**, **TypeScript**, **Tailwind CSS**, and
 
 ## Features
 
-- 🏛️ Browse universities → careers → file repositories
-- 🧭 Breadcrumb navigation throughout (Home › University › Career › Files)
-- 🔍 Filter files by category and subject; sorted by most recent
+- 🏛️ Browse universities → careers → subjects → files
+- 📚 Subjects organized by **year and semester** (accordion), with a search bar
+- 🧭 Breadcrumbs throughout (Inicio › Di Tella › Derecho › 2° Año › Contratos I)
+- 🔢 File counts on university, career and subject cards
+- 🔍 Filter files by category + sort toggle (**Más recientes / Más descargados**)
 - ⬇️ Public download — anyone can browse and download **without** logging in
+- 📈 Per-file download counter (via a `SECURITY DEFINER` RPC)
 - 🔐 Email + password auth (Supabase) — login required to **upload**
-- 📤 Upload PDF, images, Word, PowerPoint, etc. with rich metadata
+- 📤 Drag & drop upload with cascading **Year → Semester → Subject** selection
 - 👤 Profile page listing your uploads, with delete (owner-only)
-- 📱 Responsive, minimal design (Notion / Linear style) with loading & empty states
+- 🍎 Apple-style design: frosted-glass navbar, pill buttons, soft shadows, SVG empty states
+- 📱 Fully responsive with loading & empty states
 
 ---
 
@@ -66,13 +70,22 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-public-key
 
 Open **Supabase Dashboard → SQL Editor → New query** and run, in order:
 
-1. [`supabase/schema.sql`](./supabase/schema.sql) — creates tables, the
-   `handle_new_user` trigger, all RLS policies, and the public `files` storage
-   bucket with its policies.
+1. [`supabase/schema.sql`](./supabase/schema.sql) — creates all tables
+   (`profiles`, `universities`, `careers`, `subjects`, `files`), the
+   `handle_new_user` trigger, the `increment_downloads` RPC, all RLS policies,
+   and the public `files` storage bucket with its policies.
 2. [`supabase/seed.sql`](./supabase/seed.sql) — inserts the starter
-   universities (Di Tella, San Andrés) and their careers.
+   universities (Di Tella, San Andrés), their careers, and the full **Derecho
+   (Di Tella) curriculum** as subjects (by year & semester).
 
 You can copy-paste each file's contents into the SQL editor and click **Run**.
+
+> **Already set up an earlier version?** If you previously ran `schema.sql` /
+> `seed.sql` before the subject system existed, run
+> [`supabase/migration-subjects.sql`](./supabase/migration-subjects.sql)
+> instead. It adds the `subjects` table, the `subject_id` + `downloads` columns
+> on `files`, the `increment_downloads` RPC, the RLS policy, and seeds the
+> Derecho curriculum. It is idempotent (safe to run more than once).
 
 ### 5. (Optional) Email confirmation
 
@@ -107,7 +120,8 @@ Open [http://localhost:3000](http://localhost:3000).
 | `profiles`     | `id` (= `auth.uid`), `username`, `avatar_url`, `created_at` |
 | `universities` | `id`, `name`, `slug`, `logo_url`, `description` |
 | `careers`      | `id`, `university_id`, `name`, `slug`, `description` |
-| `files`        | `id`, `career_id`, `user_id`, `title`, `description`, `category`, `subject`, `semester`, `year`, `file_url`, `file_name`, `file_size`, `created_at` |
+| `subjects`     | `id`, `career_id`, `name`, `slug`, `year` (1–7), `semester` (1–2), `created_at` |
+| `files`        | `id`, `career_id`, `subject_id`, `user_id`, `title`, `description`, `category`, `subject`, `semester`, `year`, `file_url`, `file_name`, `file_size`, `downloads`, `created_at` |
 
 A trigger (`handle_new_user`) automatically inserts a `profiles` row whenever a
 new auth user is created, taking the `username` from sign-up metadata (falling
@@ -121,11 +135,16 @@ back to the email prefix, and de-duplicating on collision).
 | -------------- | ------ | ------ | ------ | ------ |
 | `universities` | anyone | — | — | — |
 | `careers`      | anyone | — | — | — |
+| `subjects`     | anyone | — | — | — |
 | `profiles`     | anyone | own (`auth.uid() = id`) | own | — |
 | `files`        | anyone | authenticated, own `user_id` | owner | owner |
 
 **Storage bucket `files`:** public read, authenticated insert, owner-only
 delete.
+
+The `increment_downloads(uuid)` function is `SECURITY DEFINER` and granted to
+`anon` + `authenticated`, so download counts can be bumped without granting
+broad `UPDATE` on `files`.
 
 ---
 
@@ -134,7 +153,7 @@ delete.
 Files are stored in the public `files` bucket using the path pattern:
 
 ```
-/{university_slug}/{career_slug}/{timestamp}-{sanitized-filename}
+/{university_slug}/{career_slug}/{subject_slug}/{timestamp}-{sanitized-filename}
 ```
 
 Max upload size enforced client-side: **25 MB**.
@@ -148,34 +167,39 @@ app/
   layout.tsx                  # Root layout (Navbar + footer)
   page.tsx                    # Homepage — university grid
   not-found.tsx               # 404
-  [university]/page.tsx       # Careers list
-  [university]/[career]/page.tsx  # Files list + upload
+  [university]/page.tsx       # Careers list (with file counts)
+  [university]/[career]/page.tsx           # Subjects by year/semester + search
+  [university]/[career]/[subject]/page.tsx # Files for a subject + filters/sort
   auth/login/page.tsx
   auth/signup/page.tsx
   auth/callback/route.ts      # Email-confirmation code exchange
   profile/page.tsx            # User's uploaded files
 components/
-  Navbar, Breadcrumb, UniversityCard, CareerCard,
-  FileCard, FileList, FileUpload, ProfileFiles,
-  AuthShell, SetupNotice
+  Navbar, Breadcrumb, UniversityCard, CareerCard, SubjectCard,
+  SubjectAccordion, FileCard, FileBrowser, FileUpload, ProfileFiles,
+  AuthShell, EmptyState, SetupNotice, icons
 lib/
-  supabase.ts                 # Browser + server client factories
+  supabase.ts                 # Browser client factory
+  supabase-server.ts          # Server client factory (cookies)
   utils.ts                    # formatFileSize, slugify, etc.
 types/
   index.ts                    # Shared TypeScript types
 supabase/
-  schema.sql                  # Tables, RLS, storage, trigger
-  seed.sql                    # Seed universities + careers
+  schema.sql                  # Tables, RLS, storage, trigger, RPC
+  seed.sql                    # Seed universities, careers + Derecho subjects
+  migration-subjects.sql      # Upgrade an existing DB to the subject system
 middleware.ts                 # Refreshes the Supabase session per request
 ```
 
 ---
 
-## Adding more universities / careers
+## Adding more universities / careers / subjects
 
-Insert rows into `universities` and `careers` (via the SQL editor or the Table
-editor). Make sure each `slug` is URL-safe and unique — slugs drive the routing
-(`/{university_slug}/{career_slug}`).
+Insert rows into `universities`, `careers` and `subjects` (via the SQL editor or
+the Table editor). Make sure each `slug` is URL-safe and unique within its parent
+— slugs drive the routing (`/{university_slug}/{career_slug}/{subject_slug}`).
+For subjects, set `year` (1–7) and `semester` (1 or 2) so they group correctly in
+the accordion. See `supabase/migration-subjects.sql` for the Derecho example.
 
 ---
 

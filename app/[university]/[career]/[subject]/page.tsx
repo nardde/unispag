@@ -2,30 +2,25 @@ import { notFound } from 'next/navigation';
 import { createServerClient } from '@/lib/supabase-server';
 import { Breadcrumb } from '@/components/Breadcrumb';
 import { FileUpload } from '@/components/FileUpload';
-import { SubjectAccordion } from '@/components/SubjectAccordion';
-import { FileCard } from '@/components/FileCard';
+import { FileBrowser } from '@/components/FileBrowser';
 import { EmptyState } from '@/components/EmptyState';
 import { SetupNotice } from '@/components/SetupNotice';
-import type {
-  University,
-  Career,
-  Subject,
-  SubjectWithCount,
-  FileRecord,
-} from '@/types';
+import { yearLabel, semesterLabel } from '@/types';
+import type { University, Career, Subject, FileRecord } from '@/types';
 
 export const dynamic = 'force-dynamic';
 
 async function getData(
   universitySlug: string,
-  careerSlug: string
+  careerSlug: string,
+  subjectSlug: string
 ): Promise<
   | {
       ok: true;
       university: University;
       career: Career;
-      subjects: SubjectWithCount[];
-      orphanFiles: FileRecord[];
+      subject: Subject;
+      files: FileRecord[];
     }
   | { ok: false; reason: 'config' | 'notfound' }
 > {
@@ -54,45 +49,36 @@ async function getData(
 
   if (!career) return { ok: false, reason: 'notfound' };
 
-  const { data: subjects } = await supabase
+  const { data: subject } = await supabase
     .from('subjects')
     .select('*')
-    .eq('career_id', career.id);
+    .eq('career_id', career.id)
+    .eq('slug', subjectSlug)
+    .maybeSingle();
 
-  // File counts per subject + orphan (subject-less) files.
+  if (!subject) return { ok: false, reason: 'notfound' };
+
   const { data: files } = await supabase
     .from('files')
     .select('*, profiles(username)')
-    .eq('career_id', career.id)
+    .eq('subject_id', subject.id)
     .order('created_at', { ascending: false });
-
-  const fileList = (files ?? []) as FileRecord[];
-  const counts = new Map<string, number>();
-  fileList.forEach((f) => {
-    if (f.subject_id)
-      counts.set(f.subject_id, (counts.get(f.subject_id) ?? 0) + 1);
-  });
-
-  const subjectsWithCount = ((subjects ?? []) as Subject[]).map((s) => ({
-    ...s,
-    fileCount: counts.get(s.id) ?? 0,
-  }));
 
   return {
     ok: true,
     university: university as University,
     career: career as Career,
-    subjects: subjectsWithCount,
-    orphanFiles: fileList.filter((f) => !f.subject_id),
+    subject: subject as Subject,
+    files: (files ?? []) as FileRecord[],
   };
 }
 
-export default async function CareerPage({
+export default async function SubjectPage({
   params,
 }: {
-  params: { university: string; career: string };
+  params: { university: string; career: string; subject: string };
 }) {
-  const result = await getData(params.university, params.career);
+  const result = await getData(params.university, params.career, params.subject);
 
   if (!result.ok && result.reason === 'notfound') notFound();
 
@@ -104,9 +90,7 @@ export default async function CareerPage({
     );
   }
 
-  const { university, career, subjects, orphanFiles } = result;
-  const basePath = `/${university.slug}/${career.slug}`;
-  const totalFiles = subjects.reduce((n, s) => n + s.fileCount, 0) + orphanFiles.length;
+  const { university, career, subject, files } = result;
 
   return (
     <div className="container-page">
@@ -114,49 +98,38 @@ export default async function CareerPage({
         items={[
           { label: 'Inicio', href: '/' },
           { label: university.name, href: `/${university.slug}` },
-          { label: career.name },
+          { label: career.name, href: `/${university.slug}/${career.slug}` },
+          { label: yearLabel(subject.year) },
+          { label: subject.name },
         ]}
       />
 
       <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight text-ink">
-            {career.name}
+            {subject.name}
           </h1>
           <p className="mt-1 text-sm text-subtle">
-            {university.name} · {subjects.length}{' '}
-            {subjects.length === 1 ? 'materia' : 'materias'} · {totalFiles}{' '}
-            {totalFiles === 1 ? 'archivo' : 'archivos'}
+            {yearLabel(subject.year)} · {semesterLabel(subject.semester)} ·{' '}
+            {files.length} {files.length === 1 ? 'archivo' : 'archivos'}
           </p>
         </div>
         <FileUpload
           careerId={career.id}
           universitySlug={university.slug}
           careerSlug={career.slug}
-          subjects={subjects}
+          subjects={[subject]}
+          presetSubject={subject}
         />
       </header>
 
-      {subjects.length === 0 ? (
+      {files.length === 0 ? (
         <EmptyState
-          title="Aún no hay materias para esta carrera"
-          description="El plan de estudios de esta carrera todavía no fue cargado. Pronto vas a poder explorar sus materias acá."
+          title="Todavía no hay archivos"
+          description="Sé el primero en compartir apuntes, parciales o resúmenes de esta materia."
         />
       ) : (
-        <SubjectAccordion subjects={subjects} basePath={basePath} />
-      )}
-
-      {orphanFiles.length > 0 && (
-        <section className="mt-12">
-          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-subtle">
-            Sin materia asignada
-          </h2>
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {orphanFiles.map((file) => (
-              <FileCard key={file.id} file={file} />
-            ))}
-          </div>
-        </section>
+        <FileBrowser files={files} />
       )}
     </div>
   );

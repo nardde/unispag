@@ -1,29 +1,33 @@
 import Link from 'next/link';
-import type { Career } from '@/types';
+import type { CareerWithCount } from '@/types';
+import { CAREER_EMOJI } from '@/components/icons';
 
 export function CareerCard({
   career,
   universitySlug,
 }: {
-  career: Career;
+  career: CareerWithCount;
   universitySlug: string;
 }) {
+  const emoji = CAREER_EMOJI[career.slug] ?? '📚';
+
   return (
     <Link
       href={`/${universitySlug}/${career.slug}`}
-      className="card group flex items-center justify-between p-5 transition-all hover:-translate-y-0.5 hover:shadow-card-hover"
+      className="card card-hover group flex items-center gap-4 p-5"
     >
-      <div className="min-w-0">
-        <h3 className="truncate text-base font-semibold text-gray-900 group-hover:text-brand-700">
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-surface text-2xl">
+        {emoji}
+      </div>
+      <div className="min-w-0 flex-1">
+        <h3 className="truncate text-[15px] font-semibold text-ink">
           {career.name}
         </h3>
-        {career.description && (
-          <p className="mt-0.5 line-clamp-1 text-sm text-gray-500">
-            {career.description}
-          </p>
-        )}
+        <p className="mt-0.5 text-sm text-subtle">
+          {career.fileCount} {career.fileCount === 1 ? 'archivo' : 'archivos'}
+        </p>
       </div>
-      <span className="ml-4 shrink-0 text-gray-300 transition-colors group-hover:text-brand-500">
+      <span className="shrink-0 text-hairline transition-colors group-hover:text-brand-500">
         →
       </span>
     </Link>

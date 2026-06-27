@@ -31,9 +31,21 @@ create table if not exists public.careers (
   unique (university_id, slug)
 );
 
+create table if not exists public.subjects (
+  id uuid primary key default gen_random_uuid(),
+  career_id uuid not null references public.careers (id) on delete cascade,
+  name text not null,
+  slug text not null,
+  year int not null check (year between 1 and 7),
+  semester int not null check (semester between 1 and 2),
+  created_at timestamptz not null default now(),
+  unique (career_id, slug)
+);
+
 create table if not exists public.files (
   id uuid primary key default gen_random_uuid(),
   career_id uuid not null references public.careers (id) on delete cascade,
+  subject_id uuid references public.subjects (id) on delete set null,
   user_id uuid not null references public.profiles (id) on delete cascade,
   title text not null,
   description text,
@@ -44,12 +56,15 @@ create table if not exists public.files (
   file_url text not null,
   file_name text not null,
   file_size bigint not null default 0,
+  downloads int not null default 0,
   created_at timestamptz not null default now()
 );
 
 create index if not exists files_career_id_idx on public.files (career_id);
+create index if not exists files_subject_id_idx on public.files (subject_id);
 create index if not exists files_user_id_idx on public.files (user_id);
 create index if not exists careers_university_id_idx on public.careers (university_id);
+create index if not exists subjects_career_id_idx on public.subjects (career_id);
 
 -- ----------------------------------------------------------------------------
 -- Auto-create a profile row when a new auth user signs up.
@@ -94,6 +109,7 @@ create trigger on_auth_user_created
 alter table public.profiles enable row level security;
 alter table public.universities enable row level security;
 alter table public.careers enable row level security;
+alter table public.subjects enable row level security;
 alter table public.files enable row level security;
 
 -- Universities: public read.
@@ -104,6 +120,11 @@ create policy "universities_select" on public.universities
 -- Careers: public read.
 drop policy if exists "careers_select" on public.careers;
 create policy "careers_select" on public.careers
+  for select using (true);
+
+-- Subjects: public read.
+drop policy if exists "subjects_select" on public.subjects;
+create policy "subjects_select" on public.subjects
   for select using (true);
 
 -- Profiles: public read; users can insert/update their own row.
@@ -138,6 +159,21 @@ drop policy if exists "files_update_own" on public.files;
 create policy "files_update_own" on public.files
   for update to authenticated
   using (auth.uid() = user_id);
+
+-- ----------------------------------------------------------------------------
+-- increment_downloads(): public, SECURITY DEFINER so anyone (even anonymous)
+-- can bump a file's download counter without broad UPDATE rights.
+-- ----------------------------------------------------------------------------
+create or replace function public.increment_downloads(p_file_id uuid)
+returns void
+language sql
+security definer
+set search_path = public
+as $$
+  update public.files set downloads = downloads + 1 where id = p_file_id;
+$$;
+
+grant execute on function public.increment_downloads(uuid) to anon, authenticated;
 
 -- ----------------------------------------------------------------------------
 -- Storage bucket: "files" (public read, authenticated write/delete-own)
