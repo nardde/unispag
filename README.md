@@ -11,7 +11,8 @@ Built with **Next.js 14 (App Router)**, **TypeScript**, **Tailwind CSS**, and
 
 ## Features
 
-- 🏛️ Browse universities → careers → subjects → files
+- 🏛️ 12 CABA/AMBA universities → careers → subjects → files, with a homepage search
+- ✍️ **Collaborative subjects** — any logged-in user can add a materia (year/semester), Wikipedia-style, with case-insensitive duplicate protection
 - 📚 Subjects organized by **year and semester** (accordion), with a search bar
 - 🧭 Breadcrumbs throughout (Inicio › Di Tella › Derecho › 2° Año › Contratos I)
 - 🔢 File counts on university, career and subject cards
@@ -80,12 +81,16 @@ Open **Supabase Dashboard → SQL Editor → New query** and run, in order:
 
 You can copy-paste each file's contents into the SQL editor and click **Run**.
 
-> **Already set up an earlier version?** If you previously ran `schema.sql` /
-> `seed.sql` before the subject system existed, run
-> [`supabase/migration-subjects.sql`](./supabase/migration-subjects.sql)
-> instead. It adds the `subjects` table, the `subject_id` + `downloads` columns
-> on `files`, the `increment_downloads` RPC, the RLS policy, and seeds the
-> Derecho curriculum. It is idempotent (safe to run more than once).
+> **Upgrading an existing database?** Run these migrations in the SQL Editor
+> (each is idempotent — safe to re-run):
+>
+> 1. [`supabase/migration-subjects.sql`](./supabase/migration-subjects.sql) —
+>    adds the `subjects` table, `subject_id` + `downloads` on `files`, the
+>    `increment_downloads` RPC, RLS, and seeds the Derecho curriculum.
+> 2. [`supabase/migration-universities.sql`](./supabase/migration-universities.sql) —
+>    adds `acronym`/`zone` on universities, `description` + an authenticated
+>    INSERT policy on `subjects`, and seeds the 10 CABA/AMBA universities and
+>    their careers.
 
 ### 5. (Optional) Email confirmation
 
@@ -118,9 +123,9 @@ Open [http://localhost:3000](http://localhost:3000).
 | Table          | Columns |
 | -------------- | ------- |
 | `profiles`     | `id` (= `auth.uid`), `username`, `avatar_url`, `created_at` |
-| `universities` | `id`, `name`, `slug`, `logo_url`, `description` |
+| `universities` | `id`, `name`, `slug`, `acronym`, `zone`, `logo_url`, `description` |
 | `careers`      | `id`, `university_id`, `name`, `slug`, `description` |
-| `subjects`     | `id`, `career_id`, `name`, `slug`, `year` (1–7), `semester` (1–2), `created_at` |
+| `subjects`     | `id`, `career_id`, `name`, `slug`, `description`, `year` (1–7), `semester` (1–2), `created_at` |
 | `files`        | `id`, `career_id`, `subject_id`, `user_id`, `title`, `description`, `category`, `subject`, `semester`, `year`, `file_url`, `file_name`, `file_size`, `downloads`, `created_at` |
 
 A trigger (`handle_new_user`) automatically inserts a `profiles` row whenever a
@@ -135,7 +140,7 @@ back to the email prefix, and de-duplicating on collision).
 | -------------- | ------ | ------ | ------ | ------ |
 | `universities` | anyone | — | — | — |
 | `careers`      | anyone | — | — | — |
-| `subjects`     | anyone | — | — | — |
+| `subjects`     | anyone | any authenticated user | — | — |
 | `profiles`     | anyone | own (`auth.uid() = id`) | own | — |
 | `files`        | anyone | authenticated, own `user_id` | owner | owner |
 
@@ -175,9 +180,9 @@ app/
   auth/callback/route.ts      # Email-confirmation code exchange
   profile/page.tsx            # User's uploaded files
 components/
-  Navbar, Breadcrumb, UniversityCard, CareerCard, SubjectCard,
-  SubjectAccordion, FileCard, FileBrowser, FileUpload, ProfileFiles,
-  AuthShell, EmptyState, SetupNotice, icons
+  Navbar, Breadcrumb, UniversityCard, UniversityGrid, CareerCard,
+  SubjectCard, SubjectAccordion, AddSubject, FileCard, FileBrowser,
+  FileUpload, ProfileFiles, AuthShell, EmptyState, SetupNotice, icons
 lib/
   supabase.ts                 # Browser client factory
   supabase-server.ts          # Server client factory (cookies)
@@ -186,8 +191,9 @@ types/
   index.ts                    # Shared TypeScript types
 supabase/
   schema.sql                  # Tables, RLS, storage, trigger, RPC
-  seed.sql                    # Seed universities, careers + Derecho subjects
-  migration-subjects.sql      # Upgrade an existing DB to the subject system
+  seed.sql                    # Seed all 12 universities, careers + Derecho subjects
+  migration-subjects.sql      # Upgrade: subjects + downloads system
+  migration-universities.sql  # Upgrade: 12 universities + collaborative subjects
 middleware.ts                 # Refreshes the Supabase session per request
 ```
 

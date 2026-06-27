@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { createServerClient } from '@/lib/supabase-server';
 import { Breadcrumb } from '@/components/Breadcrumb';
-import { FileUpload } from '@/components/FileUpload';
+import { AddSubject } from '@/components/AddSubject';
 import { SubjectAccordion } from '@/components/SubjectAccordion';
 import { FileCard } from '@/components/FileCard';
 import { EmptyState } from '@/components/EmptyState';
@@ -129,19 +129,28 @@ export default async function CareerPage({
             {totalFiles === 1 ? 'archivo' : 'archivos'}
           </p>
         </div>
-        <FileUpload
-          careerId={career.id}
-          universitySlug={university.slug}
-          careerSlug={career.slug}
-          subjects={subjects}
-        />
+        {subjects.length > 0 && (
+          <AddSubject
+            careerId={career.id}
+            universitySlug={university.slug}
+            careerSlug={career.slug}
+            existingSubjects={subjects}
+          />
+        )}
       </header>
 
       {subjects.length === 0 ? (
         <EmptyState
-          title="Aún no hay materias para esta carrera"
-          description="El plan de estudios de esta carrera todavía no fue cargado. Pronto vas a poder explorar sus materias acá."
-        />
+          title="Todavía no hay materias para esta carrera"
+          description="¡Sé el primero en agregarla! Las materias las cargan los estudiantes, de forma colaborativa."
+        >
+          <AddSubject
+            careerId={career.id}
+            universitySlug={university.slug}
+            careerSlug={career.slug}
+            existingSubjects={subjects}
+          />
+        </EmptyState>
       ) : (
         <SubjectAccordion subjects={subjects} basePath={basePath} />
       )}

@@ -18,6 +18,8 @@ create table if not exists public.universities (
   id uuid primary key default gen_random_uuid(),
   name text not null,
   slug text unique not null,
+  acronym text,
+  zone text,
   logo_url text,
   description text
 );
@@ -36,6 +38,7 @@ create table if not exists public.subjects (
   career_id uuid not null references public.careers (id) on delete cascade,
   name text not null,
   slug text not null,
+  description text,
   year int not null check (year between 1 and 7),
   semester int not null check (semester between 1 and 2),
   created_at timestamptz not null default now(),
@@ -122,10 +125,15 @@ drop policy if exists "careers_select" on public.careers;
 create policy "careers_select" on public.careers
   for select using (true);
 
--- Subjects: public read.
+-- Subjects: public read; any authenticated user can create (crowdsourced).
 drop policy if exists "subjects_select" on public.subjects;
 create policy "subjects_select" on public.subjects
   for select using (true);
+
+drop policy if exists "subjects_insert_authenticated" on public.subjects;
+create policy "subjects_insert_authenticated" on public.subjects
+  for insert to authenticated
+  with check (true);
 
 -- Profiles: public read; users can insert/update their own row.
 drop policy if exists "profiles_select" on public.profiles;

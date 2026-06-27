@@ -4,6 +4,8 @@ export interface University {
   id: string;
   name: string;
   slug: string;
+  acronym: string | null;
+  zone: string | null;
   logo_url: string | null;
   description: string | null;
 }
@@ -21,7 +23,8 @@ export interface Subject {
   career_id: string;
   name: string;
   slug: string;
-  year: number; // 1..5
+  description: string | null;
+  year: number; // 1..6
   semester: number; // 1 | 2
   created_at: string;
 }

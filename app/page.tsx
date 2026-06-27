@@ -1,5 +1,5 @@
 import { createServerClient } from '@/lib/supabase-server';
-import { UniversityCard } from '@/components/UniversityCard';
+import { UniversityGrid } from '@/components/UniversityGrid';
 import { SetupNotice } from '@/components/SetupNotice';
 import { EmptyState } from '@/components/EmptyState';
 import type { University, UniversityWithCount } from '@/types';
@@ -62,16 +62,7 @@ export default async function HomePage() {
           description="Ejecutá el script de datos iniciales (seed) descrito en el README para cargar las universidades y carreras."
         />
       ) : (
-        <>
-          <h2 className="mb-5 text-sm font-semibold uppercase tracking-wide text-subtle">
-            Universidades
-          </h2>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {universities.map((u) => (
-              <UniversityCard key={u.id} university={u} />
-            ))}
-          </div>
-        </>
+        <UniversityGrid universities={universities} />
       )}
     </div>
   );

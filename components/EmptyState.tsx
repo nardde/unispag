@@ -5,10 +5,13 @@ export function EmptyState({
   title,
   description,
   action,
+  children,
 }: {
   title: string;
   description: string;
   action?: { label: string; href: string };
+  /** Custom action node (e.g. a modal trigger). Rendered below the text. */
+  children?: React.ReactNode;
 }) {
   return (
     <div className="card flex flex-col items-center justify-center px-6 py-20 text-center">
@@ -20,6 +23,7 @@ export function EmptyState({
           {action.label}
         </Link>
       )}
+      {children && <div className="mt-6">{children}</div>}
     </div>
   );
 }

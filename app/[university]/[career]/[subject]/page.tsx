@@ -113,6 +113,11 @@ export default async function SubjectPage({
             {yearLabel(subject.year)} · {semesterLabel(subject.semester)} ·{' '}
             {files.length} {files.length === 1 ? 'archivo' : 'archivos'}
           </p>
+          {subject.description && (
+            <p className="mt-2 max-w-xl text-sm text-subtle">
+              {subject.description}
+            </p>
+          )}
         </div>
         <FileUpload
           careerId={career.id}
