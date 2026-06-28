@@ -1,5 +1,5 @@
 -- ============================================================================
--- UniFiles — Migration: onboarding, profile personalization, feedback
+-- UniPag — Migration: onboarding, profile personalization, feedback
 -- Run in the Supabase SQL Editor. Idempotent (safe to run more than once).
 -- ============================================================================
 

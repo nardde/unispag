@@ -9,6 +9,7 @@ import { GlobalSearch } from '@/components/GlobalSearch';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { NotificationBell } from '@/components/NotificationBell';
 import { Avatar } from '@/components/Avatar';
+import { OnboardingModal } from '@/components/onboarding/OnboardingModal';
 import { ChevronIcon } from '@/components/icons';
 
 export function Navbar() {
@@ -18,6 +19,7 @@ export function Navbar() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [role, setRole] = useState<string>('user');
   const [menuOpen, setMenuOpen] = useState(false);
+  const [feedOpen, setFeedOpen] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -48,17 +50,18 @@ export function Navbar() {
   }
 
   return (
+    <>
     <header className="glass sticky top-0 z-30 border-b border-black/[0.06] dark:border-white/[0.08]">
       <nav className="container-page flex h-14 items-center gap-3">
         <Link href="/" className="flex shrink-0 items-center gap-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/logo.png"
-            alt="UniFiles"
+            alt="UniPag"
             className="h-8 w-8 rounded-[8px] object-cover"
           />
           <span className="hidden text-[17px] font-semibold tracking-tight text-ink sm:block">
-            UniFiles
+            UniPag
           </span>
         </Link>
 
@@ -67,6 +70,12 @@ export function Navbar() {
         </div>
 
         <div className="flex shrink-0 items-center gap-1">
+          <Link
+            href="/sugerencias"
+            className="btn-ghost hidden md:inline-flex"
+          >
+            Sugerencias
+          </Link>
           <ThemeToggle />
           {user && <NotificationBell />}
 
@@ -122,6 +131,15 @@ export function Navbar() {
                         >
                           Mis archivos
                         </Link>
+                        <button
+                          onClick={() => {
+                            setMenuOpen(false);
+                            setFeedOpen(true);
+                          }}
+                          className="block w-full rounded-xl px-3 py-2 text-left text-sm text-ink hover:bg-surface"
+                        >
+                          ⚙ Personalizar mi feed
+                        </button>
                       </>
                     )}
                     {role === 'admin' && (
@@ -156,5 +174,9 @@ export function Navbar() {
         </div>
       </nav>
     </header>
+    {feedOpen && user && (
+      <OnboardingModal userId={user.id} onClose={() => setFeedOpen(false)} />
+    )}
+    </>
   );
 }

@@ -1,5 +1,5 @@
 -- ============================================================================
--- UniFiles — Migration: CABA/AMBA universities + collaborative subjects
+-- UniPag — Migration: CABA/AMBA universities + collaborative subjects
 -- Run in the Supabase SQL Editor. Idempotent (safe to run more than once).
 -- Adds: acronym/zone on universities, description + INSERT policy on subjects,
 -- and seeds 10 new universities with their careers.

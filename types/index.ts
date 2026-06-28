@@ -82,6 +82,65 @@ export const RATING_LABELS: Record<number, string> = {
   5: '¡Me encanta!',
 };
 
+export const SUBJECT_REPORT_REASONS = [
+  'El nombre está mal escrito',
+  'Corresponde a otra carrera',
+  'El año o cuatrimestre está mal',
+  'Es una materia duplicada',
+  'Otro',
+] as const;
+
+export const CAREER_REPORT_REASONS = [
+  'El nombre está mal escrito',
+  'No pertenece a esta universidad',
+  'Es una carrera duplicada',
+  'Ya no se dicta',
+  'Otro',
+] as const;
+
+export type SuggestionStatus =
+  | 'pending'
+  | 'approved'
+  | 'planned'
+  | 'completed'
+  | 'rejected';
+
+export const SUGGESTION_TYPES = [
+  'Nueva funcionalidad',
+  'Mejora de algo existente',
+  'Problema que encontré',
+  'Contenido faltante',
+  'Otro',
+] as const;
+
+export const SUGGESTION_TYPE_STYLES: Record<string, string> = {
+  'Nueva funcionalidad': 'bg-brand-50 text-brand-700 dark:bg-brand-900/40 dark:text-brand-200',
+  'Mejora de algo existente': 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300',
+  'Problema que encontré': 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300',
+  'Contenido faltante': 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300',
+  Otro: 'bg-surface text-subtle',
+};
+
+export const SUGGESTION_STATUS_LABELS: Record<SuggestionStatus, string> = {
+  pending: 'En revisión',
+  approved: 'En revisión',
+  planned: 'Planificado',
+  completed: 'Completado',
+  rejected: 'Rechazado',
+};
+
+export interface Suggestion {
+  id: string;
+  user_id: string | null;
+  type: string;
+  title: string;
+  description: string;
+  contact_email: string | null;
+  status: SuggestionStatus;
+  created_at: string;
+  profiles?: { username: string; avatar_url: string | null } | null;
+}
+
 export type ReportStatus = 'pending' | 'resolved' | 'dismissed';
 
 export interface Report {

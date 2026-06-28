@@ -186,14 +186,13 @@ export default async function HomePage() {
           materia. Gratis, hecho por estudiantes.
         </p>
         {userId && (
-          <div className="mt-6 flex justify-center">
-            <Onboarding
-              userId={userId}
-              autoOpen={autoOnboarding}
-              initialUniversities={personalization?.myUniIds ?? []}
-              initialCareers={personalization?.myCareerIds ?? []}
-            />
-          </div>
+          <Onboarding
+            userId={userId}
+            autoOpen={autoOnboarding}
+            showButton={false}
+            initialUniversities={personalization?.myUniIds ?? []}
+            initialCareers={personalization?.myCareerIds ?? []}
+          />
         )}
       </section>
 
@@ -216,20 +215,15 @@ export default async function HomePage() {
                   <Link
                     key={m.id}
                     href={m.href}
-                    className="card card-hover flex items-center justify-between gap-3 p-4"
+                    className="card card-hover flex flex-col justify-center gap-0.5 p-4"
                   >
-                    <div className="min-w-0">
-                      <p className="truncate text-[15px] font-medium text-ink">
-                        {m.name}
-                      </p>
-                      <p className="mt-0.5 text-xs text-subtle">
-                        {yearLabel(m.year)} · {semesterLabel(m.semester)}
-                        {m.latest ? ` · último ${formatDate(m.latest)}` : ''}
-                      </p>
-                    </div>
-                    <span className="shrink-0 rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700 dark:bg-brand-900/40 dark:text-brand-200">
-                      {m.fileCount}
-                    </span>
+                    <p className="truncate text-[15px] font-medium text-ink">
+                      {m.name}
+                    </p>
+                    <p className="text-xs text-subtle">
+                      {yearLabel(m.year)} · {semesterLabel(m.semester)}
+                      {m.latest ? ` · último ${formatDate(m.latest)}` : ''}
+                    </p>
                   </Link>
                 ))}
               </div>

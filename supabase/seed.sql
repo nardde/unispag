@@ -1,5 +1,5 @@
 -- ============================================================================
--- UniFiles — Seed data (universities + careers)
+-- UniPag — Seed data (universities + careers)
 -- Run AFTER schema.sql, in the Supabase SQL Editor.
 -- Safe to re-run: uses ON CONFLICT on the unique slug columns.
 -- ============================================================================

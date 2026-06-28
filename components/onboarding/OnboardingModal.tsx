@@ -50,6 +50,25 @@ export function OnboardingModal({
       .from('careers')
       .select('id, name, university_id')
       .then(({ data }) => setCareers((data ?? []) as Career[]));
+
+    // Pre-fill with the user's existing selections (so re-opening keeps them).
+    if (initialUniversities.length === 0 && initialCareers.length === 0) {
+      supabase
+        .from('user_universities')
+        .select('university_id')
+        .eq('user_id', userId)
+        .then(({ data }) =>
+          setSelUnis((data ?? []).map((r: { university_id: string }) => r.university_id))
+        );
+      supabase
+        .from('user_careers')
+        .select('career_id')
+        .eq('user_id', userId)
+        .then(({ data }) =>
+          setSelCareers((data ?? []).map((r: { career_id: string }) => r.career_id))
+        );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const uniOptions: Option[] = unis.map((u) => ({
@@ -111,7 +130,7 @@ export function OnboardingModal({
           {step === 1 && (
             <div className="py-6 text-center">
               <h2 className="text-2xl font-semibold text-ink">
-                Bienvenido a UniFiles 👋
+                Bienvenido a UniPag 👋
               </h2>
               <p className="mx-auto mt-2 max-w-sm text-[15px] text-subtle">
                 Te hacemos 3 preguntas rápidas para personalizar tu experiencia.
@@ -218,7 +237,7 @@ export function OnboardingModal({
                 disabled={saving}
                 className="btn-primary mt-6"
               >
-                {saving ? 'Guardando…' : 'Ir a UniFiles'}
+                {saving ? 'Guardando…' : 'Ir a UniPag'}
               </button>
             </div>
           )}

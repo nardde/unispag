@@ -1,38 +1,42 @@
 import Link from 'next/link';
 import type { SubjectWithCount } from '@/types';
-import { yearLabel, semesterLabel } from '@/types';
+import { SUBJECT_REPORT_REASONS, yearLabel, semesterLabel } from '@/types';
+import { ReportFlag } from '@/components/ReportFlag';
 
 export function SubjectCard({
   subject,
   basePath,
+  showSemester = true,
 }: {
   subject: SubjectWithCount;
   /** e.g. `/di-tella/derecho` */
   basePath: string;
+  showSemester?: boolean;
 }) {
   return (
-    <Link
-      href={`${basePath}/${subject.slug}`}
-      className="card card-hover group flex items-center justify-between gap-3 p-4"
-    >
-      <div className="min-w-0">
+    <div className="relative">
+      <Link
+        href={`${basePath}/${subject.slug}`}
+        className="card card-hover group flex min-h-[68px] flex-col justify-center p-4 pr-8"
+      >
         <p className="truncate text-[15px] font-medium leading-snug text-ink">
           {subject.name}
         </p>
-        <p className="mt-0.5 text-xs text-subtle">
-          {yearLabel(subject.year)} · {semesterLabel(subject.semester)}
-        </p>
+        {showSemester && (
+          <p className="mt-0.5 text-xs text-subtle">
+            {yearLabel(subject.year)} · {semesterLabel(subject.semester)}
+          </p>
+        )}
+      </Link>
+      <div className="absolute bottom-2 right-2">
+        <ReportFlag
+          entityId={subject.id}
+          table="subject_reports"
+          idColumn="subject_id"
+          reasons={SUBJECT_REPORT_REASONS}
+          title="Reportar materia"
+        />
       </div>
-      <span
-        className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${
-          subject.fileCount > 0
-            ? 'bg-brand-50 text-brand-700'
-            : 'bg-surface text-subtle'
-        }`}
-        title={`${subject.fileCount} archivos`}
-      >
-        {subject.fileCount}
-      </span>
-    </Link>
+    </div>
   );
 }

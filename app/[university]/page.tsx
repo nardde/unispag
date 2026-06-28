@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { createServerClient } from '@/lib/supabase-server';
 import { Breadcrumb } from '@/components/Breadcrumb';
 import { CareerCard } from '@/components/CareerCard';
+import { SuggestCareer } from '@/components/SuggestCareer';
 import { SetupNotice } from '@/components/SetupNotice';
 import type { University, Career, CareerWithCount } from '@/types';
 
@@ -127,6 +128,8 @@ export default async function UniversityPage({
           ))}
         </div>
       )}
+
+      <SuggestCareer universityId={university.id} />
     </div>
   );
 }

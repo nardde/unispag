@@ -1,5 +1,5 @@
 -- ============================================================================
--- UniFiles — Migration: admin, reports, ratings, search, follows, notifications
+-- UniPag — Migration: admin, reports, ratings, search, follows, notifications
 -- Run in the Supabase SQL Editor. Idempotent (safe to run more than once).
 -- ============================================================================
 

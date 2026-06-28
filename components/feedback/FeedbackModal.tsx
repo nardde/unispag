@@ -93,7 +93,7 @@ export function FeedbackModal({
           <>
             <div className="flex items-center justify-between border-b border-hairline/60 p-4">
               <h2 className="flex items-center gap-2 text-[17px] font-semibold text-ink">
-                <span>⭐</span> ¿Qué te parece UniFiles?
+                <span>⭐</span> ¿Qué te parece UniPag?
               </h2>
               <button
                 onClick={dismiss}
@@ -167,7 +167,7 @@ export function FeedbackModal({
               {step === 4 && (
                 <div>
                   <p className="mb-4 text-center text-[15px] font-medium text-ink">
-                    ¿Recomendarías UniFiles a un compañero?
+                    ¿Recomendarías UniPag a un compañero?
                   </p>
                   <div className="flex flex-wrap justify-center gap-1.5">
                     {Array.from({ length: 11 }, (_, i) => i).map((n) => (

@@ -17,16 +17,16 @@ export function AuthShell({
         <Link
           href="/"
           className="mx-auto mb-6 flex w-fit items-center gap-2"
-          aria-label="UniFiles"
+          aria-label="UniPag"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/logo.png"
-            alt="UniFiles"
+            alt="UniPag"
             className="h-9 w-9 rounded-[9px] object-cover"
           />
           <span className="text-lg font-semibold tracking-tight text-ink">
-            UniFiles
+            UniPag
           </span>
         </Link>
         <div className="card animate-fade-in p-8">

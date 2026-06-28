@@ -7,9 +7,13 @@ const LINKS = [
   { href: '/admin', label: 'Dashboard', exact: true },
   { href: '/admin/archivos', label: 'Archivos' },
   { href: '/admin/reportes', label: 'Reportes' },
+  { href: '/admin/reportes-materias', label: 'Reportes de materias' },
+  { href: '/admin/reportes-carreras', label: 'Reportes de carreras' },
   { href: '/admin/usuarios', label: 'Usuarios' },
   { href: '/admin/universidades', label: 'Universidades' },
   { href: '/admin/materias', label: 'Materias' },
+  { href: '/admin/sugerencias-carreras', label: 'Sugerencias de carreras' },
+  { href: '/admin/sugerencias-usuarios', label: 'Sugerencias de usuarios' },
   { href: '/admin/opiniones', label: 'Opiniones' },
 ];
 

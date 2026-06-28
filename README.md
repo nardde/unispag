@@ -1,4 +1,4 @@
-# UniFiles
+# UniPag
 
 A clean, Apple-inspired platform for university students to share and download
 study material — notes, exams, summaries and more — organized by **university →
@@ -95,6 +95,8 @@ You can copy-paste each file's contents into the SQL editor and click **Run**.
 >    see **Nuevas migraciones** below.
 > 4. [`supabase/migration-onboarding.sql`](./supabase/migration-onboarding.sql) —
 >    see **Nuevas migraciones** below.
+> 5. [`supabase/migration-suggestions.sql`](./supabase/migration-suggestions.sql) —
+>    see **Nuevas migraciones** below.
 
 ## Nuevas migraciones
 
@@ -157,6 +159,22 @@ What it powers:
 - **Feedback**: a one-time modal triggered by the 3rd download, the 1st upload,
   or 7 days + 3 visits; results live in the admin **Opiniones** section
   (averages, NPS, distribution, tag clouds, table, CSV export).
+
+### Subject/career reports & suggestions
+
+[`supabase/migration-suggestions.sql`](./supabase/migration-suggestions.sql)
+(idempotent) adds:
+
+- `subject_reports` and `career_reports` (flag icon on each subject/career card,
+  one per user; admins resolve/dismiss or delete the entity)
+- `career_suggestions` (a "¿No encontrás tu carrera? Sugerila" form on each
+  university page; admins **Aprobar** — which creates the career — or **Rechazar**)
+- `suggestions` + `suggestion_upvotes` powering the public **/sugerencias** page
+  (submit a feature idea; community upvotes approved ideas; statuses **En
+  revisión / Planificado / Completado**)
+
+All four get their own admin sections (Reportes de materias, Reportes de
+carreras, Sugerencias de carreras, Sugerencias de usuarios).
 
 ### 5. (Optional) Email confirmation
 

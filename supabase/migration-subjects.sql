@@ -1,5 +1,5 @@
 -- ============================================================================
--- UniFiles — Migration: subject organization + download counter
+-- UniPag — Migration: subject organization + download counter
 -- Run this in the Supabase SQL Editor IF you already ran the original
 -- schema.sql / seed.sql. It is idempotent (safe to run more than once).
 -- For a brand-new project, schema.sql + seed.sql already include all of this.
